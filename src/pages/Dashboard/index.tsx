@@ -1,12 +1,19 @@
-import Header from "../../components/Header";
+import { Header } from "../../components/Header";
 import { api } from "../../services/api";
-import Food from "../../components/Food";
-import ModalAddFood from "../../components/ModalAddFood";
-import ModalEditFood from "../../components/ModalEditFood";
+import { Food } from "../../components/Food";
+import { ModalAddFood } from "../../components/ModalAddFood";
+import { ModalEditFood } from "../../components/ModalEditFood";
 import { FoodsContainer } from "./styles";
 import { useEffect, useState } from "react";
 
-interface FoodProps {
+interface FoodForm {
+  image: string;
+  name: string;
+  price: string;
+  description: string;
+}
+
+interface FoodInterface {
   id: number;
   name: string;
   description: string;
@@ -16,23 +23,22 @@ interface FoodProps {
 }
 
 export function Dashboard() {
-  const [foods, setFoods] = useState<FoodProps[]>([]);
-  const [editingFood, setEditingFood] = useState<FoodProps>({} as FoodProps);
+  const [foods, setFoods] = useState<FoodInterface[]>([]);
+  const [editingFood, setEditingFood] = useState<FoodInterface>(
+    {} as FoodInterface
+  );
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
 
   useEffect(() => {
     async function getFood() {
       const response = await api.get("/foods");
-
-      setFoods([response.data]);
+      setFoods(response.data);
     }
     getFood();
   }, []);
 
-  const handleAddFood = async (
-    food: Omit<FoodProps, "id" | "available">
-  ): Promise<void> => {
+  const handleAddFood = async (food: FoodForm): Promise<void> => {
     try {
       const response = await api.post("/foods", {
         ...food,
@@ -45,9 +51,7 @@ export function Dashboard() {
     }
   };
 
-  const handleUpdateFood = async (
-    food: Omit<FoodProps, "id" | "available">
-  ) => {
+  const handleUpdateFood = async (food: FoodForm) => {
     try {
       const foodUpdated = await api.put(`/foods/${editingFood.id}`, {
         ...editingFood,
@@ -80,7 +84,7 @@ export function Dashboard() {
     setEditModalOpen(!editModalOpen);
   };
 
-  const handleEditFood = (food: FoodProps) => {
+  const handleEditFood = (food: FoodInterface) => {
     setEditingFood(food);
     setEditModalOpen(true);
   };
